@@ -49,17 +49,18 @@ export function filterChecksWithMatchingNameAndAppId(checks: ICheck[], checksInp
     return {filteredChecks: mostRecentChecks, missingChecks};
 }
 
-export function takeMostRecentChecksForMatchingNameAndAppId(checks: ICheck[]): ICheck[] {
+export function takeMostRecentChecksForMatchingNameAndAppIdAndPR(checks: ICheck[], PRId: String): ICheck[] {
     const getUniqueAppId = [...new Set(checks.map((check) => check.app.id))];
     let mostRecentChecks: ICheck[] = [];
 
     getUniqueAppId.forEach((appId) => {
         const checksWithMatchingAppId = checks.filter((check) => check.app.id === appId);
+        const checksWithMatchingAppIdAndPrId = checksWithMatchingAppId.filter((check) => check.pull_requests[0].id === PRId)
 
         // we may have used regular expressions to get here, so we need to make sure that the checks we are comparing are actually the same
-        const getUniqueCheckName = [...new Set(checksWithMatchingAppId.map((check) => check.name))];
+        const getUniqueCheckName = [...new Set(checksWithMatchingAppIdAndPrId.map((check) => check.name))];
         getUniqueCheckName.forEach((checkName) => {
-            const checksWithMatchingName = checksWithMatchingAppId.filter((check) => check.name === checkName);
+            const checksWithMatchingName = checksWithMatchingAppIdAndPrId.filter((check) => check.name === checkName);
             const mostRecentCheck = checksWithMatchingName.reduce((prev, current) => (prev.id > current.id) ? prev : current);
             mostRecentChecks.push(mostRecentCheck);
         });
